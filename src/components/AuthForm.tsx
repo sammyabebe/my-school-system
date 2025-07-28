@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { signIn, signUp } from '../../actions/auth';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 type FolderRole = 'admins' | 'students';
@@ -19,7 +18,6 @@ export default function AuthForm({ folderRole, isSignup = false }: AuthFormProps
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const roleMap: Record<FolderRole, DBRole> = {
     admins: 'admin',
@@ -42,7 +40,7 @@ export default function AuthForm({ folderRole, isSignup = false }: AuthFormProps
       } else {
         const { error: signInError } = await signIn(email, password);
         if (signInError) throw new Error(signInError);
-        router.push(`/${folderRole}/dashboard`);
+        window.location.href = `/${folderRole}/dashboard`;
       }
     } catch (err) {
       const error = err as { code?: string; message: string };
