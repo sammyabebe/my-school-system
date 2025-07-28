@@ -39,12 +39,10 @@ export async function middleware(request: NextRequest) {
   // Redirect logged-in users away from auth pages
   if (session && isAuthPage) {
     const userRole = session.user.app_metadata?.role; // 'admin' or 'student'
-    if (!userRole || !['admin', 'student'].includes(userRole)) {
-      console.error('Invalid or missing role in user_metadata:', userRole);
-      return NextResponse.redirect(new URL('/signin', request.url));
+    if (userRole && ['admin', 'student'].includes(userRole)) {
+      const redirectPath = `/${userRole}s/dashboard`; // Pluralize for URL
+      return NextResponse.redirect(new URL(redirectPath, request.url));
     }
-    const redirectPath = `/${userRole}s/dashboard`; // Pluralize for URL
-    return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
   // Protect admin/student routes

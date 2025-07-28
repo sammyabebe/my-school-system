@@ -1,35 +1,54 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+'use server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+export async function signUp(email, password, role) {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => cookieStore.get(name)?.value,
+        set: (name, value, options) => cookieStore.set(name, value, options),
+        remove: (name, options) => cookieStore.remove(name, options),
+      },
+    }
+  );
 
-export async function signUp(email: string, password: string, role: 'admin' | 'student') {
-  // Step 1: Create auth user
-  const { data, error: authError } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { initial_role: role }
-    }
+      data: { role },
+    },
   });
-  
-  if (authError) return { error: authError.message };
-  if (!data.user) return { error: 'User creation failed' };
-  
-  // Step 2: Add to public.users table
-  const { error: dbError } = await supabase
-    .from('users')
-    .insert({
-      id: data.user.id,
-      email,
-      role
-    });
-  
-  if (dbError) return { error: dbError.message };
-  
-  return { success: true };
+
+  if (error) return { error: error.message };
+  return { data };
+}
+
+export async function signIn(email, password) {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => cookieStore.get(name)?.value,
+        set: (name, value, options) => cookieStore.set(name, value, options),
+        remove: (name, options) => cookieStore.remove(name, options),
+      },
+    }
+  );
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) return { error: error.message };
+  return { data };
 }

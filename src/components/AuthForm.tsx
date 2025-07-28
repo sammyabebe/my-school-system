@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { signIn, signUp } from '@/actions/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -36,22 +36,12 @@ export default function AuthForm({ folderRole, isSignup = false }: AuthFormProps
 
     try {
       if (isSignup) {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { role: dbRole },
-            emailRedirectTo: `${window.location.origin}/${folderRole}/dashboard`,
-          },
-        });
-        if (signUpError) throw signUpError;
+        const { error: signUpError } = await signUp(email, password, dbRole);
+        if (signUpError) throw new Error(signUpError);
         setMessage('Check your email for confirmation!');
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (signInError) throw signInError;
+        const { error: signInError } = await signIn(email, password);
+        if (signInError) throw new Error(signInError);
         router.push(`/${folderRole}/dashboard`);
       }
     } catch (err) {
