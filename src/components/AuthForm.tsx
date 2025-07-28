@@ -54,13 +54,14 @@ export default function AuthForm({ folderRole, isSignup = false }: AuthFormProps
         if (signInError) throw signInError;
         router.push(`/${folderRole}/dashboard`);
       }
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as { code?: string; message: string };
       setError(
-        err.code === 'user_already_exists'
+        error.code === 'user_already_exists'
           ? 'This email is already registered.'
-          : err.code === 'invalid_credentials'
+          : error.code === 'invalid_credentials'
           ? 'Invalid email or password.'
-          : err.message || 'An error occurred'
+          : error.message || 'An error occurred'
       );
     } finally {
       setIsLoading(false);

@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
   // Redirect logged-in users away from auth pages
   if (session && isAuthPage) {
-    const userRole = session.user.user_metadata?.role; // 'admin' or 'student'
+    const userRole = session.user.app_metadata?.role; // 'admin' or 'student'
     if (!userRole || !['admin', 'student'].includes(userRole)) {
       console.error('Invalid or missing role in user_metadata:', userRole);
       return NextResponse.redirect(new URL('/signin', request.url));
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Verify role matches the route
-    const userRole = session.user.user_metadata?.role; // 'admin' or 'student'
+    const userRole = session.user.app_metadata?.role; // 'admin' or 'student'
     const expectedRole = isAdminRoute ? 'admin' : 'student';
     if (userRole !== expectedRole) {
       console.error(`Role mismatch: expected ${expectedRole}, got ${userRole}`);
