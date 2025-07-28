@@ -22,6 +22,9 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Refresh session
+  await supabase.auth.getSession();
+
   // Get session
   const { data: { session }, error } = await supabase.auth.getSession();
 
